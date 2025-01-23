@@ -28,6 +28,28 @@ class UserController extends Controller
         return response()->json(['user' => $user], 201);
     }
 
+
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        if (!Auth::attempt($validated)) {
+            return response()->json(['error' => 'Invalid credentials'], 401);
+        }
+
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful',
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -54,27 +76,6 @@ class UserController extends Controller
 
         $user->update(['password' => Hash::make($request->new_password)]);
         return response()->json(['message' => 'Password updated successfully']);
-    }
-
-    public function login(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        if (!Auth::attempt($validated)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
-        }
-
-        $user = Auth::user();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'token' => $token,
-        ]);
     }
 
 }
