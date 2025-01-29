@@ -12,11 +12,14 @@ Route::get('/test', function () {
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/tasks', [TaskController::class, 'index']);
-    Route::post('/tasks', [TaskController::class, 'store']);
+    Route::get('/user', [UserController::class, 'getAuthenticatedUser']);
+
+    Route::post('/tasks', [TaskController::class, 'createTask']);
+    Route::get('/tasks', [TaskController::class, 'getUserTasks']);
+    Route::put('/tasks/{task}/complete', [TaskController::class, 'markComplete']);
+
     Route::put('/tasks/{task}', [TaskController::class, 'update']);
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
-
     Route::put('/user/profile', [UserController::class, 'updateProfile']);
     Route::put('/user/password', [UserController::class, 'updatePassword']);
 });

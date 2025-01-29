@@ -1,50 +1,56 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Task;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class TaskController extends Controller
 {
-    public function index()
-    {
-        $tasks = Auth::user()->tasks;
-        return response()->json(['tasks' => $tasks]);
-    }
-
-    public function store(Request $request)
+    public function createTask(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string',
             'description' => 'nullable|string',
-            'status' => 'required|in:pending,completed',
-            'deadline' => 'nullable|date',
+            'assigned_to' => 'required|email|exists:users,email', // Ensure user exists
         ]);
 
-        $task = Auth::user()->tasks()->create($validated);
-        return response()->json(['task' => $task], 201);
-    }
-
-    public function update(Request $request, Task $task)
-    {
-        $this->authorize('update', $task);
-
-        $validated = $request->validate([
-            'title' => 'sometimes|string',
-            'description' => 'sometimes|string',
-            'status' => 'sometimes|in:pending,completed',
-            'deadline' => 'sometimes|date',
+        $task = Task::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'created_by' => Auth::id(),
+            // 'created_by' => Auth::user()->name,
+            'assigned_to' => $validated['assigned_to'],
         ]);
 
-        $task->update($validated);
-        return response()->json(['task' => $task]);
+        return response()->json(['message' => 'Task created successfully', 'task' => $task], 201);
     }
 
-    public function destroy(Task $task)
+    public function getUserTasks()
     {
-        $this->authorize('delete', $task);
-        $task->delete();
-        return response()->json(['message' => 'Task deleted']);
+        $userEmail = Auth::user()->email;
+        $tasks = Task::where('assigned_to', $userEmail)->get();
+
+        return response()->json(['tasks' => $tasks]);
     }
+
+    public function completeTask($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->update(['completed' => true]);
+
+        return response()->json(['message' => 'Task marked as completed', 'task' => $task]);
+    }
+
+    public function markComplete(Task $task)
+    {
+        $task->completed = true;
+        $task->save();
+    
+        return response()->json(['message' => 'Task marked as complete', 'task' => $task]);
+    }
+    
+
+
 }

@@ -15,7 +15,7 @@ class UserController extends Controller
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:8|confirmed',
-            'role' => 'required|string',
+            'role' => 'required|in:user,admin',
         ]);
 
         $user = User::create([
@@ -49,6 +49,24 @@ class UserController extends Controller
             'token' => $token,
         ]);
     }
+
+// app/Http/Controllers/UserController.php
+public function getAuthenticatedUser(Request $request)
+{
+    // Debug: Check if the user is authenticated
+    if (!$request->user()) {
+        \Log::info('User is not authenticated');
+        return response()->json(['error' => 'Unauthenticated'], 401);
+    }
+
+    // Debug: Log the authenticated user
+    \Log::info('Authenticated user:', ['user' => $request->user()]);
+
+    // Return the authenticated user's data
+    return response()->json([
+        'user' => $request->user(),
+    ]);
+}
 
     public function updateProfile(Request $request)
     {

@@ -1,5 +1,7 @@
 <?php
 
+// error_log('Request received at index.php'); // Add this line
+
 use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
