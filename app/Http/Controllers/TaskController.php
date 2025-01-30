@@ -30,10 +30,50 @@ class TaskController extends Controller
     public function getUserTasks()
     {
         $userEmail = Auth::user()->email;
-        $tasks = Task::where('assigned_to', $userEmail)->get();
-
-        return response()->json(['tasks' => $tasks]);
+        $userId = Auth::id();
+    
+        $assignedTasks = Task::where('assigned_to', $userEmail)->get();
+        $createdTasks = Task::where('created_by', $userId)->get();
+    
+        return response()->json([
+            'assigned_tasks' => $assignedTasks,
+            'created_tasks' => $createdTasks
+        ]);
     }
+
+    public function deleteTask($id)
+{
+    $task = Task::findOrFail($id);
+
+    // Ensure only the creator can delete the task
+    if ($task->created_by !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+
+    $task->delete();
+    return response()->json(['message' => 'Task deleted successfully']);
+}
+
+
+    public function updateTask(Request $request, $id)
+{
+    $task = Task::findOrFail($id);
+
+    // Ensure only the creator can update the task
+    if ($task->created_by !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+
+    $validated = $request->validate([
+        'title' => 'required|string',
+        'description' => 'nullable|string',
+        'assigned_to' => 'required|email|exists:users,email'
+    ]);
+
+    $task->update($validated);
+
+    return response()->json(['message' => 'Task updated successfully', 'task' => $task]);
+}
 
     public function completeTask($id)
     {
