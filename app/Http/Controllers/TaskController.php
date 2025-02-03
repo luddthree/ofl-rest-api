@@ -13,19 +13,21 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string',
             'description' => 'nullable|string',
-            'assigned_to' => 'required|email|exists:users,email', // Ensure user exists
+            'assigned_to' => 'required|email|exists:users,email',
+            'deadline' => 'nullable|date|after_or_equal:today' // Ensure the deadline is in the future
         ]);
-
+    
         $task = Task::create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'created_by' => Auth::id(),
-            // 'created_by' => Auth::user()->name,
             'assigned_to' => $validated['assigned_to'],
+            'deadline' => $validated['deadline'] ?? null,
         ]);
-
+    
         return response()->json(['message' => 'Task created successfully', 'task' => $task], 201);
     }
+    
 
     public function getUserTasks()
     {
@@ -55,11 +57,10 @@ class TaskController extends Controller
 }
 
 
-    public function updateTask(Request $request, $id)
+public function updateTask(Request $request, $id)
 {
     $task = Task::findOrFail($id);
 
-    // Ensure only the creator can update the task
     if ($task->created_by !== Auth::id()) {
         return response()->json(['error' => 'Unauthorized'], 403);
     }
@@ -67,13 +68,15 @@ class TaskController extends Controller
     $validated = $request->validate([
         'title' => 'required|string',
         'description' => 'nullable|string',
-        'assigned_to' => 'required|email|exists:users,email'
+        'assigned_to' => 'required|email|exists:users,email',
+        'deadline' => 'nullable|date|after_or_equal:today' // Ensure valid deadline
     ]);
 
     $task->update($validated);
 
     return response()->json(['message' => 'Task updated successfully', 'task' => $task]);
 }
+
 
     public function completeTask($id)
     {
