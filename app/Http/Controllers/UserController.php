@@ -11,6 +11,7 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
+        // registerer bruker
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
@@ -31,6 +32,7 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
+        // login funksjon
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -50,19 +52,16 @@ class UserController extends Controller
         ]);
     }
 
-// app/Http/Controllers/UserController.php
 public function getAuthenticatedUser(Request $request)
 {
-    // Debug: Check if the user is authenticated
+    // sjekker om bruker er autentisert
     if (!$request->user()) {
         \Log::info('User is not authenticated');
         return response()->json(['error' => 'Unauthenticated'], 401);
     }
 
-    // Debug: Log the authenticated user
     \Log::info('Authenticated user:', ['user' => $request->user()]);
 
-    // Return the authenticated user's data
     return response()->json([
         'user' => $request->user(),
     ]);
@@ -70,6 +69,7 @@ public function getAuthenticatedUser(Request $request)
 
     public function updateProfile(Request $request)
     {
+        // oppdaterer brukerprofil
         $user = Auth::user();
         $validated = $request->validate([
             'name' => 'sometimes|string',
@@ -82,6 +82,7 @@ public function getAuthenticatedUser(Request $request)
 
     public function updatePassword(Request $request)
     {
+        // oppdaterer passord
         $request->validate([
             'current_password' => 'required',
             'new_password' => 'required|min:8|confirmed',

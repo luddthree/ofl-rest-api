@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Log;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Include PHPMailer (Change the path if necessary)
 // require_once 'vendor/autoload.php'; // If installed via Composer
 
 
@@ -22,13 +21,13 @@ class TaskController extends Controller
     
     public function createTask(Request $request)
     {
-        Log::info('assignTazzzzzzzzsk method triggered'); // This writes to storage/logs/laravel.log
-
+        Log::info('assignTazzzzzzzzsk method triggered'); 
+// legger til oppgave i databasen
         $validated = $request->validate([
             'title' => 'required|string',
             'description' => 'nullable|string',
             'assigned_to' => 'required|email|exists:users,email',
-            'deadline' => 'nullable|date|after_or_equal:today' // Ensure the deadline is in the future
+            'deadline' => 'nullable|date|after_or_equal:today' 
         ]);
     
         $task = Task::create([
@@ -40,7 +39,7 @@ class TaskController extends Controller
         ]);
 
 
-
+// sende epost til brukern som får oppgaven
         $mail = new PHPMailer(true);
 
         try {
@@ -54,8 +53,8 @@ class TaskController extends Controller
             $mail->Port       = 587; // SMTP port
 
             // Sender & Recipient
-            $mail->setFrom('noreply@example.com', 'Your App');
-            $mail->addAddress($validated['assigned_to']); // Send email to the assigned user's email
+            $mail->setFrom('noreply@ofl.no', 'OFL');
+            $mail->addAddress($validated['assigned_to']); 
 
             // Email Content
             $mail->isHTML(true);
@@ -79,6 +78,7 @@ class TaskController extends Controller
 
     public function getUserTasks()
     {
+        // Henter oppgaver som er tildelt brukeren eller oppgaver som brukeren har opprettet
         $userEmail = Auth::user()->email;
         $userId = Auth::id();
     
@@ -107,6 +107,7 @@ class TaskController extends Controller
 
 public function updateTask(Request $request, $id)
 {
+    // oppdaterer oppgave imformasjon
     $task = Task::findOrFail($id);
 
     if ($task->created_by !== Auth::id()) {
@@ -127,6 +128,7 @@ public function updateTask(Request $request, $id)
 
 
     public function completeTask($id)
+    // merker oppgave som fullført
     {
         $task = Task::findOrFail($id);
         $task->update(['completed' => true]);
@@ -143,6 +145,7 @@ public function updateTask(Request $request, $id)
     }
     
     public function emsend(Request $request)
+    // sender epost
     {
 
         log::info ('send email method triggered');
