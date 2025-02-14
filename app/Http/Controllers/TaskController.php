@@ -34,6 +34,7 @@ class TaskController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'created_by' => Auth::id(),
+            // 'created_by' => Auth::user()->email, 
             'assigned_to' => $validated['assigned_to'],
             'deadline' => $validated['deadline'] ?? null,
         ]);
