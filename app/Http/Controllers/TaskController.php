@@ -33,8 +33,8 @@ class TaskController extends Controller
         $task = Task::create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            'created_by' => Auth::id(),
-            // 'created_by' => Auth::user()->email, 
+            // 'created_by' => Auth::id(),
+            'created_by' => Auth::user()->email, 
             'assigned_to' => $validated['assigned_to'],
             'deadline' => $validated['deadline'] ?? null,
         ]);
@@ -93,40 +93,40 @@ class TaskController extends Controller
     }
 
     public function deleteTask($id)
-{
-    $task = Task::findOrFail($id);
-
-    // Ensure only the creator can delete the task
-    if ($task->created_by !== Auth::id()) {
-        return response()->json(['error' => 'Unauthorized'], 403);
+    {
+        $task = Task::findOrFail($id);
+    
+        // Ensure only the creator (by email) can delete the task
+        if ($task->created_by !== Auth::user()->email) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    
+        $task->delete();
+        return response()->json(['message' => 'Task deleted successfully']);
     }
-
-    $task->delete();
-    return response()->json(['message' => 'Task deleted successfully']);
-}
-
-
-public function updateTask(Request $request, $id)
-{
-    // oppdaterer oppgave imformasjon
-    $task = Task::findOrFail($id);
-
-    if ($task->created_by !== Auth::id()) {
-        return response()->json(['error' => 'Unauthorized'], 403);
+    
+    public function updateTask(Request $request, $id)
+    {
+        // Update task information
+        $task = Task::findOrFail($id);
+    
+        // Ensure only the creator (by email) can update the task
+        if ($task->created_by !== Auth::user()->email) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    
+        $validated = $request->validate([
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'assigned_to' => 'required|email|exists:users,email',
+            'deadline' => 'nullable|date|after_or_equal:today' // Ensure valid deadline
+        ]);
+    
+        $task->update($validated);
+    
+        return response()->json(['message' => 'Task updated successfully', 'task' => $task]);
     }
-
-    $validated = $request->validate([
-        'title' => 'required|string',
-        'description' => 'nullable|string',
-        'assigned_to' => 'required|email|exists:users,email',
-        'deadline' => 'nullable|date|after_or_equal:today' // Ensure valid deadline
-    ]);
-
-    $task->update($validated);
-
-    return response()->json(['message' => 'Task updated successfully', 'task' => $task]);
-}
-
+    
 
     public function completeTask($id)
     // merker oppgave som fullført
