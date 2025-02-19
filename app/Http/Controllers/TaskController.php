@@ -33,8 +33,8 @@ class TaskController extends Controller
         $task = Task::create([
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
-            // 'created_by' => Auth::id(),
-            'created_by' => Auth::user()->email, 
+            'created_by' => Auth::id(),
+            // 'created_by' => Auth::user()->email, 
             'assigned_to' => $validated['assigned_to'],
             'deadline' => $validated['deadline'] ?? null,
         ]);
@@ -93,17 +93,21 @@ class TaskController extends Controller
     }
 
     public function deleteTask($id)
-    {
-        $task = Task::findOrFail($id);
-    
-        // Ensure only the creator (by email) can delete the task
-        if ($task->created_by !== Auth::user()->email) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-    
-        $task->delete();
-        return response()->json(['message' => 'Task deleted successfully']);
+{
+    Log::info ('id'. $id);
+
+    Log::info ('auth id'. Auth::id());
+
+    $task = Task::findOrFail($id);
+    Log::info ('task id'. $task->created_by);
+
+    if ($task->created_by !== Auth::id()) {
+        return response()->json(['error' => 'Unauthorized'], 403);
     }
+
+    $task->delete();
+    return response()->json(['message' => 'Task deleted successfully']);
+}
     
     public function updateTask(Request $request, $id)
     {
@@ -111,7 +115,7 @@ class TaskController extends Controller
         $task = Task::findOrFail($id);
     
         // Ensure only the creator (by email) can update the task
-        if ($task->created_by !== Auth::user()->email) {
+        if ($task->created_by !== Auth::id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
     
