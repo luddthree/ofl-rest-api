@@ -15,11 +15,11 @@ return [
     |
     */
 
-    'paths' => ['api/*'],
+    'paths' => ['/api/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3009')],
+    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
 
     'allowed_origins_patterns' => [],
 
@@ -31,4 +31,9 @@ return [
 
     'supports_credentials' => true,
 
+
+    // 'paths' => ['api/*'],
+    // 'allowed_methods' => ['*'],
+    // 'allowed_origins' => ['http://localhost:3000'], // Your frontend URL
+    // 'allowed_headers' => ['*'],
 ];

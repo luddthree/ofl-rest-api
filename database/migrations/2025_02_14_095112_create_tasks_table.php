@@ -10,7 +10,7 @@ return new class extends Migration {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             // $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
-            $table->string('created_by'); // Store username instead of user ID
+            $table->unsignedBigInteger('created_by'); // Store username instead of user ID
             $table->string('title');
             $table->text('description')->nullable();
             $table->dateTime('deadline')->nullable();
